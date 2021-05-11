@@ -1,6 +1,8 @@
 package fr.ul.miage.bibliuniv.database.DAO;
 
 import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import fr.ul.miage.bibliuniv.database.model.Oeuvres;
 import fr.ul.miage.bibliuniv.database.model.Utilisateurs;
@@ -47,6 +49,19 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
     }
 
+
+    public int getNote(Oeuvres o){
+        Document d = connect.aggregate(Arrays.asList(
+                match(eq(o.get_id())),
+                lookup("Commentaires","_id","oeuvre","commentaires"),
+                unwind("$commentaires"),
+                group("$_id"
+                        ,Accumulators.avg("avgnote","$commentaires.note"))
+                )
+        ).first();
+        return (d == null) ? -1 : d.getInteger("avgnote");
+    }
+
     public List<Oeuvres> findByUtilisateurTOP10Note(Utilisateurs u){
         ObjectId user_id = u.get_id();
         ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
@@ -75,6 +90,24 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 : documents.stream().map(d -> find(d.getObjectId("_id"))).collect(Collectors.toList());
     }
 
+    public List<Oeuvres> findByTitre(String titre){
+        ArrayList<Document> documents = connect.find(regex("titre",titre,"i")).into(new ArrayList<>());
+        return (documents.isEmpty()) ? Collections.emptyList()
+                : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
+    }
+
+    public List<Oeuvres>findByKeyword(String contenu){
+        ArrayList<Document> documents =  connect.find(regex("contenu",contenu,"i")).into(new ArrayList<>());
+        return (documents.isEmpty()) ? Collections.emptyList()
+                : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
+    }
+
+    public List<Oeuvres> findByTheme(String theme){
+        ArrayList<Document> documents = connect.find(regex("theme",theme,"i")).into(new ArrayList<>());
+        return (documents.isEmpty()) ? Collections.emptyList()
+            : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
+    }
+
     public List<Oeuvres>findByUtilisateurLastComment(Utilisateurs u){
         ObjectId user_id = u.get_id();
         ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
@@ -95,7 +128,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                         ,Accumulators.first("theme","$theme")
                         ,Accumulators.max("publication","$commentaires.publication")),
                 sort(Sorts.descending("publication")),
-                limit(10)
+                limit(40)
 
                 )
         ).into(new ArrayList<>());
@@ -126,11 +159,14 @@ public class OeuvresDAO extends DAO<Oeuvres> {
     }
 
     public static void main(String[] args) {
-        UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
-        Utilisateurs u = utilisateursDAO.findByLogin("KimS");
+        /*UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
+        Utilisateurs u = utilisateursDAO.findByLogin("KimS");*/
         OeuvresDAO dao = new OeuvresDAO();
-        dao.findByUtilisateurTOP10Note(u);
-        dao.findByUtilisateurLastComment(u);
+        //dao.findByTheme("rapport");
+        //dao.findByKeyword("point");
+        //dao.findByTitre("os");
+        /*dao.findByUtilisateurTOP10Note(u);
+        dao.findByUtilisateurLastComment(u).size();*/
     }
 
 

@@ -1,5 +1,6 @@
 package fr.ul.miage.bibliuniv.database.model;
 
+import fr.ul.miage.bibliuniv.database.DAO.OeuvresDAO;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -87,6 +88,11 @@ public class Oeuvres extends ModelTable{
 
     public int getPages() {
         return pages;
+    }
+
+    public int getNote(){
+        OeuvresDAO dao = new OeuvresDAO();
+        return dao.getNote(this);
     }
 
     @Override

@@ -21,8 +21,10 @@ public class UtilDatabase {
 
     public static void readFile(){
         try (Stream<Path> paths = Files.walk(Paths.get("import"))) {
-            paths.filter(Files::isRegularFile)
+            paths.filter(f -> f.toString().endsWith(".txt"))
                     .forEach(f -> importFiles(f.toFile()));
+            paths.filter(f -> f.toString().endsWith(".txt")).map(Path::toFile)
+                    .forEach(File::delete);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -30,20 +32,7 @@ public class UtilDatabase {
     }
 
     public static void importFiles(File f){
-        /*
-        Titre: Les oubliés d'encre
-        Auteurs: Caine Mcdonnell, Malaki Person
-        Pages: 189
-        Publication: 2011-03-15
-        Theme: Rapport de stage
-        Formations: Mécanique, Dentiste
-        Universites: Epinal
-        Roles: Professeur
-        Contenu:
-        Suspendez, ô seigneurs, reprit le cardinal avec un étonnement mêlé de colère qu'elle était belle. Neuf fois sur dix, ayant été prises dans la crypte. Empourpré comme un verger au bord de chaque vaisseau, ce qui t'attend la prochaine aubaine. Espèrent-ils donc que l'heure vient, et là d'un instant à perdre, je passais juste dans le jugement rapide que réside la véritable souveraineté. Minuscule et chauve, tout en haut, à ce lumineux foyer ? Parvenus au point de me faire confiance. Gardez le vieillard : savoir si la vue de sa justification. Pinces, tenailles, masses de bois qui décorent la devanture de ce bâtiment en bois semblait du délire.
-         Prenez le milieu de novembre, et d'inquiétudes à te faire quitter la vie si brève et il aurait pu la lui conserver. Jure-moi que tu ne te couvres pas assez. Proprement science du sentiment, les tyrannies de l'art antique et de sombre, de mystérieux et de parfait comme le cristal : c'était bien ce que j'avance. Délivrée des soucis de sa royauté divine pour n'être point pédant. Emmenez votre demoiselle, dis-je à ma mère ; il emploierait ses vacances à la dévastation des méchants les emporte, car ils ne portaient pas d'emblème sur leurs boucliers. Naïf que j'étais amoureux de toi, reste dans la blessure. Faites-lui manger, sous la neige. Rassuré à présent, de cette indifférence, au point du jour.
-
-         */
+        System.out.println("test");
         HashMap<String,String[]> importFile;
         importFile = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
@@ -127,7 +116,6 @@ public class UtilDatabase {
 
     public static ArrayList<Utilisateurs> createDatabaseUtilisateurs(String [] utils, ObjectId id, Utilisateurs.ROLE r,ArrayList<Formations> formations,String date){
         UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
-        FormationsDAO formationsDAO = new FormationsDAO();
         ArrayList<Utilisateurs> utilisateurs = new ArrayList<>();
         Utilisateurs u;
         String[] personne;
@@ -140,8 +128,11 @@ public class UtilDatabase {
             u = utilisateursDAO.findByNomEtPrenom(nom,prenom);
             if(u == null)
                 u = utilisateursDAO.create(new Utilisateurs(id,r,nom,prenom));
-            else
+            else {
                 u.setRole(r);
+                if (u.getFormations().stream().map(user -> Integer.parseInt(user.getAnneeF())).max(Integer::compareTo).get() < Integer.parseInt(date))
+                    u.setUniversite(id);
+            }
             Formations formation = null;
             for (Formations f : formations){
                 for(int i = 0; i< u.getFormations().size();i++){

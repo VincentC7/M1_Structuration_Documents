@@ -106,6 +106,10 @@ public class Utilisateurs extends ModelTable{
         return universite;
     }
 
+    public void setUniversite(ObjectId universite) {
+        this.universite = universite;
+    }
+
     public ROLE getRole() {
         return role;
     }

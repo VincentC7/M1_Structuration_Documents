@@ -95,7 +95,8 @@ public class UtilisateursDAO extends DAO<Utilisateurs> {
         }
         if (!(obj.getRole().equals(u.getRole())))
             connect.updateOne(eq(obj.get_id()), set("role",obj.getRole().name()));
-
+        if (!(obj.getUniversite().equals(u.getUniversite())))
+            connect.updateOne(eq(obj.get_id()), set("universite",obj.getUniversite()));
         return this.find(obj.get_id());
     }
 }

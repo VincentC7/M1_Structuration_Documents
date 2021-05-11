@@ -6,7 +6,10 @@ import fr.ul.miage.bibliuniv.database.model.Utilisateurs;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -21,6 +24,13 @@ public class CommentairesDAO extends DAO<Commentaires> {
         Document d = connect.find(eq(id)).first();
         return (d == null) ? null
                 : new Commentaires(d);
+    }
+
+    public List<Commentaires> findByOeuvre(Oeuvres o) {
+        ArrayList<Document> documents = connect.find(eq("oeuvre",o.get_id())).into(new ArrayList<>());
+
+        return (documents.isEmpty()) ? Collections.emptyList()
+                : documents.stream().map(Commentaires::new).collect(Collectors.toList());
     }
 
     @Override
@@ -45,10 +55,11 @@ public class CommentairesDAO extends DAO<Commentaires> {
         UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
         CommentairesDAO commentairesDAO = new CommentairesDAO();
         Utilisateurs u = utilisateursDAO.findByLogin("BowdenH");
+        //Utilisateurs u = utilisateursDAO.findByLogin("KimS");
         OeuvresDAO dao = new OeuvresDAO();
         dao.findByUtilisateur(u);
 
-        int i = 2;
+        int i = 0;
         for(Oeuvres o : dao.findByUtilisateur(u)){
             Commentaires c = new Commentaires(u.get_id(),o.get_id(),"xD",i%10);
             commentairesDAO.create(c);
