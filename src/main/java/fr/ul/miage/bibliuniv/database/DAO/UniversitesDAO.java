@@ -8,13 +8,20 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class UniversitesDAO extends DAO<Universites> {
 
-    UniversitesDAO() {
+    public UniversitesDAO() {
         super("Universites");
     }
 
     @Override
     public Universites find(ObjectId id) {
         Document d = connect.find(eq(id)).first();
+        return (d == null) ? null
+                : new Universites(d);
+    }
+
+
+    public Universites findByNom(String nom) {
+        Document d = connect.find(eq("nom",nom)).first();
         return (d == null) ? null
                 : new Universites(d);
     }

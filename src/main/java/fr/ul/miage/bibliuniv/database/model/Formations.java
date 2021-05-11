@@ -9,8 +9,9 @@ import java.util.Map;
 
 public class Formations extends ModelTable{
 
-    private final static SecureRandom RANDOM = new SecureRandom();
-    private final static int MAX_PLACES = 300;
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int MAX_PLACES = 300;
+    private static final int MIN_PLACES = 100;
 
     public enum NIVEAU{
         BAC2("Bac + 2"),
@@ -27,7 +28,7 @@ public class Formations extends ModelTable{
         }
 
         public static NIVEAU rand(){
-            int i = RANDOM.nextInt() % NIVEAU.values().length;
+            int i = Math.abs(RANDOM.nextInt() % NIVEAU.values().length);
             return NIVEAU.values()[i];
         }
 
@@ -61,7 +62,11 @@ public class Formations extends ModelTable{
     }
 
     public void addUniversities(ObjectId id){
-        this.universites.put(id,RANDOM.nextInt()%MAX_PLACES);
+        this.universites.put(id,MIN_PLACES + Math.abs((RANDOM.nextInt()%(MAX_PLACES - MIN_PLACES))));
+    }
+
+    public boolean universitesPresent(ObjectId id){
+        return this.universites.containsKey(id);
     }
 
 

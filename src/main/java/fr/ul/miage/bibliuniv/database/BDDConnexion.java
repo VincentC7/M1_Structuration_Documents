@@ -12,9 +12,9 @@ public class BDDConnexion {
     private MongoDatabase database;
 
     private BDDConnexion(){
-        try(var mongoClient = MongoClients.create()) {
-            database = mongoClient.getDatabase("structuration_document");
-        }
+        var mongoClient = MongoClients.create();
+        database = mongoClient.getDatabase("structuration_document");
+
     }
 
     public static MongoDatabase getInstance(){
