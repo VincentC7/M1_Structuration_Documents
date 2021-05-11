@@ -88,4 +88,17 @@ public class Oeuvres extends ModelTable{
     public int getPages() {
         return pages;
     }
+
+    @Override
+    public String toString() {
+        return "Oeuvres{" +
+                "_id=" + _id + "\n\r" +
+                ", titre='" + titre + '\'' + "\n\r" +
+                ", theme='" + theme + '\'' + "\n\r" +
+                ", contenu='" + contenu + '\'' + "\n\r" +
+                ", publication=" + publication + "\n\r" +
+                ", pages=" + pages + "\n\r" +
+                ", roles=" + roles + "\n\r" +
+                '}' + "\n\r";
+    }
 }

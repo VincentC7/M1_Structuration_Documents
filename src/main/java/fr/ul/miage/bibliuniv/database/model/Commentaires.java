@@ -13,12 +13,12 @@ public class Commentaires extends ModelTable{
     private int note;
     private LocalDateTime publication;
 
-    public Commentaires(ObjectId auteur, ObjectId oeuvre, String commentaire, int note, LocalDateTime publication) {
+    public Commentaires(ObjectId auteur, ObjectId oeuvre, String commentaire, int note) {
         this.auteur = auteur;
         this.oeuvre = oeuvre;
         this.commentaire = commentaire;
         this.note = note;
-        this.publication = publication;
+        this.publication = LocalDateTime.now();
     }
 
     public Commentaires(Document d){

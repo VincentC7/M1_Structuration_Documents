@@ -1,9 +1,12 @@
 package fr.ul.miage.bibliuniv.database.DAO;
 
 import fr.ul.miage.bibliuniv.database.model.Commentaires;
+import fr.ul.miage.bibliuniv.database.model.Oeuvres;
 import fr.ul.miage.bibliuniv.database.model.Utilisateurs;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+
+import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -36,5 +39,22 @@ public class CommentairesDAO extends DAO<Commentaires> {
     @Override
     public Commentaires update(Commentaires obj) {
         return null;
+    }
+
+    public static void main(String[] args) {
+        UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
+        CommentairesDAO commentairesDAO = new CommentairesDAO();
+        Utilisateurs u = utilisateursDAO.findByLogin("BowdenH");
+        OeuvresDAO dao = new OeuvresDAO();
+        dao.findByUtilisateur(u);
+
+        int i = 2;
+        for(Oeuvres o : dao.findByUtilisateur(u)){
+            Commentaires c = new Commentaires(u.get_id(),o.get_id(),"xD",i%10);
+            commentairesDAO.create(c);
+            System.out.println(i++);
+            System.out.println(o);
+        }
+
     }
 }

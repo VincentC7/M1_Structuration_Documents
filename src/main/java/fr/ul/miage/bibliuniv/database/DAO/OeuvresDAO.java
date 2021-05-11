@@ -1,15 +1,20 @@
 package fr.ul.miage.bibliuniv.database.DAO;
 
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Sorts;
 import fr.ul.miage.bibliuniv.database.model.Oeuvres;
 import fr.ul.miage.bibliuniv.database.model.Utilisateurs;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import javax.swing.text.Utilities;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Aggregates.*;
 import static com.mongodb.client.model.Filters.*;
 
 public class OeuvresDAO extends DAO<Oeuvres> {
@@ -25,7 +30,8 @@ public class OeuvresDAO extends DAO<Oeuvres> {
 
     public List<Oeuvres> findByUtilisateur(Utilisateurs u){
         ObjectId user_id = u.get_id();
-        ObjectId format_id = u.getFormations().stream().filter(f -> f.getAnneeF() == null).findFirst().get().getFormation();
+        ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
+                .toCollection(ArrayList::new));
         ObjectId univ_id = u.getUniversite();
         Utilisateurs.ROLE role = u.getRole();
         ArrayList<Document> documents = connect.find(
@@ -41,22 +47,61 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
     }
 
-    public List<Oeuvres> findByUtilisateurTOP10(Utilisateurs u){
+    public List<Oeuvres> findByUtilisateurTOP10Note(Utilisateurs u){
         ObjectId user_id = u.get_id();
-        ObjectId format_id = u.getFormations().stream().filter(f -> f.getAnneeF() == null).findFirst().get().getFormation();
+        ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
+                .toCollection(ArrayList::new));
         ObjectId univ_id = u.getUniversite();
         Utilisateurs.ROLE role = u.getRole();
-        ArrayList<Document> documents = connect.find(
-                or(
+        ArrayList<Document> documents = connect.aggregate(Arrays.asList(
+                    match(or(
+                            in("formations",format_id),
+                            in("universites",univ_id),
+                            in("auteurs",user_id),
+                            in("role",role.name())
+                    )),
+                    lookup("Commentaires","_id","oeuvre","commentaires"),
+                    unwind("$commentaires"),
+                    group("$_id"
+                            ,Accumulators.first("titre","$titre")
+                            ,Accumulators.first("theme","$theme")
+                            ,Accumulators.avg("avgnote","$commentaires.note")),
+                    sort(Sorts.descending("avgnote")),
+                    limit(10)
+
+                )
+        ).into(new ArrayList<>());
+        return (documents.isEmpty()) ? Collections.emptyList()
+                : documents.stream().map(d -> find(d.getObjectId("_id"))).collect(Collectors.toList());
+    }
+
+    public List<Oeuvres>findByUtilisateurLastComment(Utilisateurs u){
+        ObjectId user_id = u.get_id();
+        ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
+                .toCollection(ArrayList::new));
+        ObjectId univ_id = u.getUniversite();
+        Utilisateurs.ROLE role = u.getRole();
+        ArrayList<Document> documents = connect.aggregate(Arrays.asList(
+                match(or(
                         in("formations",format_id),
                         in("universites",univ_id),
                         in("auteurs",user_id),
                         in("role",role.name())
+                )),
+                lookup("Commentaires","_id","oeuvre","commentaires"),
+                unwind("$commentaires"),
+                group("$_id"
+                        ,Accumulators.first("titre","$titre")
+                        ,Accumulators.first("theme","$theme")
+                        ,Accumulators.max("publication","$commentaires.publication")),
+                sort(Sorts.descending("publication")),
+                limit(10)
+
                 )
-        )
-                .into(new ArrayList<>());
+        ).into(new ArrayList<>());
+
         return (documents.isEmpty()) ? Collections.emptyList()
-                : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
+                : documents.stream().map(d -> find(d.getObjectId("_id"))).collect(Collectors.toList());
     }
 
     @Override
@@ -79,4 +124,17 @@ public class OeuvresDAO extends DAO<Oeuvres> {
     public Oeuvres update(Oeuvres obj) {
         return null;
     }
+
+    public static void main(String[] args) {
+        UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
+        Utilisateurs u = utilisateursDAO.findByLogin("KimS");
+        OeuvresDAO dao = new OeuvresDAO();
+        dao.findByUtilisateurTOP10Note(u);
+        dao.findByUtilisateurLastComment(u);
+    }
+
+
+
 }
+
+

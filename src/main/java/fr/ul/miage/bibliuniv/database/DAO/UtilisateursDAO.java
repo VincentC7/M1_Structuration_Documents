@@ -37,6 +37,12 @@ public class UtilisateursDAO extends DAO<Utilisateurs> {
                 : new Utilisateurs(d);
     }
 
+    public Utilisateurs findByLogin(String login) {
+        Document d = connect.find(eq("login",login)).first();
+        return (d == null) ? null
+                : new Utilisateurs(d);
+    }
+
     public int countLogin(String login){
         Document d= connect.aggregate(Arrays.asList(
 

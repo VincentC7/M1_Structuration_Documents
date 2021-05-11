@@ -164,7 +164,7 @@ public class UtilDatabase {
         OeuvresDAO oeuvresDAO = new OeuvresDAO();
         HashSet<ObjectId> auteurs = utilisateurs.stream().map(u -> u.get_id()).collect(Collectors.toCollection(HashSet::new));
         HashSet<ObjectId> univs = universites.stream().map(u -> u.get_id()).collect(Collectors.toCollection(HashSet::new));
-        HashSet<ObjectId> formats = utilisateurs.stream().map(f -> f.get_id()).collect(Collectors.toCollection(HashSet::new));
+        HashSet<ObjectId> formats = formations.stream().map(f -> f.get_id()).collect(Collectors.toCollection(HashSet::new));
         HashSet<Utilisateurs.ROLE> role = new HashSet<>(roles);
         String[] date =  oeuvre.get("Publication")[0].trim().split("-");
         Oeuvres o = new Oeuvres(oeuvre.get("Titre")[0].trim(),
