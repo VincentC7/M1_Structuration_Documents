@@ -150,22 +150,27 @@ public class UtilDatabase {
 
     public static void createDatabaseOeuvres(HashMap<String,String[]> oeuvre, ArrayList<Universites> universites, ArrayList<Utilisateurs> utilisateurs , ArrayList<Formations> formations, ArrayList<Utilisateurs.ROLE> roles){
         OeuvresDAO oeuvresDAO = new OeuvresDAO();
-        HashSet<ObjectId> auteurs = utilisateurs.stream().map(u -> u.get_id()).collect(Collectors.toCollection(HashSet::new));
-        HashSet<ObjectId> univs = universites.stream().map(u -> u.get_id()).collect(Collectors.toCollection(HashSet::new));
-        HashSet<ObjectId> formats = formations.stream().map(f -> f.get_id()).collect(Collectors.toCollection(HashSet::new));
-        HashSet<Utilisateurs.ROLE> role = new HashSet<>(roles);
         String[] date =  oeuvre.get("Publication")[0].trim().split("-");
-        Oeuvres o = new Oeuvres(oeuvre.get("Titre")[0].trim(),
-                                oeuvre.get("Theme")[0].trim(),
-                                oeuvre.get("Contenu")[0].trim(),
-                                auteurs,
-                                formats,
-                                univs,
-                                role,
-                                LocalDate.of(Integer.parseInt(date[0]),Integer.parseInt(date[1]),Integer.parseInt(date[2])),
-                                Integer.parseInt(oeuvre.get("Pages")[0].trim())
-                                );
-        oeuvresDAO.create(o);
+        LocalDate d = LocalDate.of(Integer.parseInt(date[0]),Integer.parseInt(date[1]),Integer.parseInt(date[2]));
+        var doc = oeuvresDAO.findByTitreEtDate(oeuvre.get("Titre")[0].trim(),d);
+        if(doc == null) {
+            HashSet<ObjectId> auteurs = utilisateurs.stream().map(u -> u.get_id()).collect(Collectors.toCollection(HashSet::new));
+            HashSet<ObjectId> univs = universites.stream().map(u -> u.get_id()).collect(Collectors.toCollection(HashSet::new));
+            HashSet<ObjectId> formats = formations.stream().map(f -> f.get_id()).collect(Collectors.toCollection(HashSet::new));
+            HashSet<Utilisateurs.ROLE> role = new HashSet<>(roles);
+
+            Oeuvres o = new Oeuvres(oeuvre.get("Titre")[0].trim(),
+                    oeuvre.get("Theme")[0].trim(),
+                    oeuvre.get("Contenu")[0].trim(),
+                    auteurs,
+                    formats,
+                    univs,
+                    role,
+                    d,
+                    Integer.parseInt(oeuvre.get("Pages")[0].trim())
+            );
+            oeuvresDAO.create(o);
+        }
 
     }
 

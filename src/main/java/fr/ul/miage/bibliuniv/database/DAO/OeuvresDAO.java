@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import javax.swing.text.Utilities;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,18 +31,26 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 : new Oeuvres(d);
     }
 
+
+    public Oeuvres findByTitreEtDate(String titre, LocalDate date) {
+        Document d = connect.find(and(eq("titre",titre),eq("publication",date))).first();
+        return (d == null) ? null
+                : new Oeuvres(d);
+    }
+
     public List<Oeuvres> findByUtilisateur(Utilisateurs u){
         ObjectId user_id = u.get_id();
         ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
                 .toCollection(ArrayList::new));
         ObjectId univ_id = u.getUniversite();
         Utilisateurs.ROLE role = u.getRole();
+        System.out.println(u.getRole().name());
         ArrayList<Document> documents = connect.find(
                 or(
                         in("formations",format_id),
                         in("universites",univ_id),
                         in("auteurs",user_id),
-                        in("role",role.name())
+                        in("roles",role.name())
                 )
         )
                 .into(new ArrayList<>());
@@ -73,7 +82,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                             in("formations",format_id),
                             in("universites",univ_id),
                             in("auteurs",user_id),
-                            in("role",role.name())
+                            in("roles",role.name())
                     )),
                     lookup("Commentaires","_id","oeuvre","commentaires"),
                     unwind("$commentaires"),
@@ -100,7 +109,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 in("formations",format_id),
                 in("universites",univ_id),
                 in("auteurs",user_id),
-                in("role",role.name())
+                in("roles",role.name())
         ))).into(new ArrayList<>());
         return (documents.isEmpty()) ? Collections.emptyList()
                 : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
@@ -116,7 +125,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 in("formations",format_id),
                 in("universites",univ_id),
                 in("auteurs",user_id),
-                in("role",role.name())
+                in("roles",role.name())
         ))).into(new ArrayList<>());
         return (documents.isEmpty()) ? Collections.emptyList()
                 : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
@@ -132,7 +141,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 in("formations",format_id),
                 in("universites",univ_id),
                 in("auteurs",user_id),
-                in("role",role.name())
+                in("roles",role.name())
                 ))).into(new ArrayList<>());
         return (documents.isEmpty()) ? Collections.emptyList()
             : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
@@ -149,7 +158,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                         in("formations",format_id),
                         in("universites",univ_id),
                         in("auteurs",user_id),
-                        in("role",role.name())
+                        in("roles",role.name())
                 )),
                 lookup("Commentaires","_id","oeuvre","commentaires"),
                 unwind("$commentaires"),
@@ -189,9 +198,11 @@ public class OeuvresDAO extends DAO<Oeuvres> {
     }
 
     public static void main(String[] args) {
-        /*UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
-        Utilisateurs u = utilisateursDAO.findByLogin("KimS");*/
+        UtilisateursDAO utilisateursDAO = new UtilisateursDAO();
+        Utilisateurs u = utilisateursDAO.findByLogin("McdonnellC");
         OeuvresDAO dao = new OeuvresDAO();
+        for(Oeuvres o : dao.findByUtilisateur(u))//dao.findByUtilisateur(u) )
+            System.out.println(o);
         //dao.findByTheme("rapport");
         //dao.findByKeyword("point");
         //dao.findByTitre("os");
