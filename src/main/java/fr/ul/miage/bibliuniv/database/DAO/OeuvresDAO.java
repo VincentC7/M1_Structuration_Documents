@@ -90,20 +90,50 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                 : documents.stream().map(d -> find(d.getObjectId("_id"))).collect(Collectors.toList());
     }
 
-    public List<Oeuvres> findByTitre(String titre){
-        ArrayList<Document> documents = connect.find(regex("titre",titre,"i")).into(new ArrayList<>());
+    public List<Oeuvres> findByTitre(String titre,Utilisateurs u){
+        ObjectId user_id = u.get_id();
+        ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
+                .toCollection(ArrayList::new));
+        ObjectId univ_id = u.getUniversite();
+        Utilisateurs.ROLE role = u.getRole();
+        ArrayList<Document> documents = connect.find(and(regex("titre",titre,"i"),or(
+                in("formations",format_id),
+                in("universites",univ_id),
+                in("auteurs",user_id),
+                in("role",role.name())
+        ))).into(new ArrayList<>());
         return (documents.isEmpty()) ? Collections.emptyList()
                 : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
     }
 
-    public List<Oeuvres>findByKeyword(String contenu){
-        ArrayList<Document> documents =  connect.find(regex("contenu",contenu,"i")).into(new ArrayList<>());
+    public List<Oeuvres>findByKeyword(String contenu,Utilisateurs u){
+        ObjectId user_id = u.get_id();
+        ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
+                .toCollection(ArrayList::new));
+        ObjectId univ_id = u.getUniversite();
+        Utilisateurs.ROLE role = u.getRole();
+        ArrayList<Document> documents =  connect.find(and(regex("contenu",contenu,"i"),or(
+                in("formations",format_id),
+                in("universites",univ_id),
+                in("auteurs",user_id),
+                in("role",role.name())
+        ))).into(new ArrayList<>());
         return (documents.isEmpty()) ? Collections.emptyList()
                 : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
     }
 
-    public List<Oeuvres> findByTheme(String theme){
-        ArrayList<Document> documents = connect.find(regex("theme",theme,"i")).into(new ArrayList<>());
+    public List<Oeuvres> findByTheme(String theme,Utilisateurs u){
+        ObjectId user_id = u.get_id();
+        ArrayList<ObjectId> format_id = u.getFormations().stream().map(f -> f.getFormation()).collect(Collectors
+                .toCollection(ArrayList::new));
+        ObjectId univ_id = u.getUniversite();
+        Utilisateurs.ROLE role = u.getRole();
+        ArrayList<Document> documents = connect.find(and(regex("theme",theme,"i"),or(
+                in("formations",format_id),
+                in("universites",univ_id),
+                in("auteurs",user_id),
+                in("role",role.name())
+                ))).into(new ArrayList<>());
         return (documents.isEmpty()) ? Collections.emptyList()
             : documents.stream().map(Oeuvres::new).collect(Collectors.toList());
     }
