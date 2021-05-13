@@ -54,6 +54,7 @@ public class Formations extends ModelTable{
     public Formations(Document d){
         this._id = d.getObjectId("_id");
         this.niveau = NIVEAU.valueOf(d.getString("niveau"));
+        this.nom = d.getString("nom");
         this.universites = new HashMap<>();
         var univs = d.getList("universites",Document.class);
         for(Document doc : univs){

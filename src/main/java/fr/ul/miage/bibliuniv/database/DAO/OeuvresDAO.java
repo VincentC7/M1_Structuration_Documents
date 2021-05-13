@@ -59,7 +59,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
     }
 
 
-    public int getNote(Oeuvres o){
+    public double getNote(Oeuvres o){
         Document d = connect.aggregate(Arrays.asList(
                 match(eq(o.get_id())),
                 lookup("Commentaires","_id","oeuvre","commentaires"),
@@ -68,7 +68,7 @@ public class OeuvresDAO extends DAO<Oeuvres> {
                         ,Accumulators.avg("avgnote","$commentaires.note"))
                 )
         ).first();
-        return (d == null) ? -1 : d.getInteger("avgnote");
+        return (d == null) ? -1 : d.getDouble("avgnote");
     }
 
     public List<Oeuvres> findByUtilisateurTOP10Note(Utilisateurs u){

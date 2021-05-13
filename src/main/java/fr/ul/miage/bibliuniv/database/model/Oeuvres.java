@@ -90,7 +90,7 @@ public class Oeuvres extends ModelTable{
         return pages;
     }
 
-    public int getNote(){
+    public double getNote(){
         OeuvresDAO dao = new OeuvresDAO();
         return dao.getNote(this);
     }
