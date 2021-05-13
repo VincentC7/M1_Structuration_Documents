@@ -21,10 +21,8 @@ public class UtilDatabase {
 
     public static void readFile(){
         try (Stream<Path> paths = Files.walk(Paths.get("import"))) {
-            paths.filter(f -> f.toString().endsWith(".txt"))
-                    .forEach(f -> importFiles(f.toFile()));
             paths.filter(f -> f.toString().endsWith(".txt")).map(Path::toFile)
-                    .forEach(File::delete);
+                    .forEach(f -> {importFiles(f);f.delete();});
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -32,7 +30,6 @@ public class UtilDatabase {
     }
 
     public static void importFiles(File f){
-        System.out.println("test");
         HashMap<String,String[]> importFile;
         importFile = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
